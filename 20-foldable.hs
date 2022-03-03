@@ -352,8 +352,21 @@ testFour = hspec $ do
 filterF
     :: (Applicative f, Foldable t, Monoid (f a))
     => (a -> Bool) -> t a -> f a
-filterF f = foldr go mempty
+filterF f = foldMap go
     where
-        go x z
-            | f x       = pure x <> z
-            | otherwise = z
+        go x
+            | f x       = pure x
+            | otherwise = mempty
+
+--      f = foldr go mempty
+--  where
+--      go x z
+--          | f x       = pure x <> z
+--          | otherwise = z
+
+testFilterF :: IO ()
+testFilterF = hspec $ do
+    describe "filterF (Unit Tests)" $ do
+        prop "List Empty"     $ filterF odd []      `shouldBe` []
+        prop "List Singelton" $ filterF odd [1]     `shouldBe` [1]
+        prop "List"           $ filterF odd [1,2,3] `shouldBe` [1,3]
